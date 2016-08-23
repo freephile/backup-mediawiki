@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
  
 ####################################################################
 #                                                                  #
@@ -12,7 +12,7 @@
 # 1st Mod: http://www.mediawiki.org/wiki/User:Kaotic               #
 # 2nd Mod: http://www.mediawiki.org/wiki/User:Megam0rf             #
 # 3rd Mod: http://www.mediawiki.org/wiki/User:Robkam               #
-# 4rd Mod: http://kodango.com/backup-mediawiki                     #
+# 4th Mod: http://kodango.com/backup-mediawiki                     #
 #                                                                  #
 # This script comes without any warranty, use it at your own risk. #
 #                                                                  #
@@ -22,7 +22,7 @@
 # CHANGE THESE OPTIONS TO MATCH YOUR SYSTEM ! #
 ###############################################
  
-function usage()
+function usage ()
 {
     cat <<EOF
 Usage: `basename $0` <-n db_name> <-u db_user> <-p db_pwd> <-b backup_dir>
