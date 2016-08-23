@@ -109,7 +109,7 @@ mysqldump --default-character-set=$charset --user=$db_user \
  
 echo -e "creating file archive \t$filedump..."
 cd "$wiki_dir"
-tar --exclude .svn -zcf "$filedump" . || exit $?
+tar --exclude .svn --exclude-backups --exclude-caches -zcf "$filedump" . || exit $?
  
 echo -e "creating XML dump \t$xmldump..."
 cd "$wiki_dir/maintenance"
