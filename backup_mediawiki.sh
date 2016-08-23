@@ -12,7 +12,8 @@
 # 1st Mod: http://www.mediawiki.org/wiki/User:Kaotic               #
 # 2nd Mod: http://www.mediawiki.org/wiki/User:Megam0rf             #
 # 3rd Mod: http://www.mediawiki.org/wiki/User:Robkam               #
-# 4th Mod: http://kodango.com/backup-mediawiki                     #
+# 4th Mod: http://kodango.com/backup-mediawiki  
+# 5th Mod: http://www.mediawiki.org/wiki/User:Freephile
 #                                                                  #
 # This script comes without any warranty, use it at your own risk. #
 #                                                                  #
@@ -39,7 +40,8 @@ Options:
 
 Examples:
   bash `basename $0` -n my_wiki -u root -p 123456 -b ./bak_wiki -w /var/www/my_wiki
-
+  or more securely using ~/.my.cnf for db user and password
+  bash `basename $0` -n my_wiki -b ./bak_wiki -w /var/www/my_wiki
 EOF
 }
 
@@ -66,8 +68,19 @@ if [ $# -eq 0 ]; then
     usage && exit 0
 fi
 
-if [ -z "$db_name" ] || [ -z "$db_pwd" ] || [ -z "$wiki_dir" ] || \
-        [ -z "$db_user" ] || [ -z "$bak_dir" ]; then
+# Database user and password can be safely read from the defaults-file
+defaults_file="$HOME/.my.cnf"
+
+if [ -f "$defaults_file" ]; then
+  if [ $(stat -c %a $defaults_file) != 600 ]; then
+    echo "Error, trying to read $defaults_file but needs to be chmod 600" >&2
+    usage && exit1
+  fi
+  if [ -z "$db_name" ] || [ -z "$wiki_dir" ] || [ -z "$bak_dir" ]; then
+    echo "Error, missing some required options" >&2
+    usage && exit 1
+  fi
+elif [ -z "$db_name" ] || [ -z "$wiki_dir" ] || [ -z "$bak_dir" ] ||  [ -z "$db_user" ] || [ -z "$db_pwd" ]; then
     echo "Error, missing some required options" >&2
     usage && exit 1
 fi
@@ -104,9 +117,13 @@ echo
 echo -e "Wiki backup:\n-------------"
 echo -e " Database:  $db_name\n Directory: $wiki_dir\n Backup to: $bak_dir"
 echo -e "\ncreating database dump \t$dbdump..."
-mysqldump --default-character-set=$charset --user=$db_user \
+if [ -f "$defaults_file" ]; then 
+  mysqldump --default-character-set=$charset "$db_name" | gzip > "$dbdump" || exit $?
+else
+  mysqldump --default-character-set=$charset --user=$db_user \
         --password=$db_pwd "$db_name" | gzip > "$dbdump" || exit $?
- 
+fi
+
 echo -e "creating file archive \t$filedump..."
 cd "$wiki_dir"
 tar --exclude .svn --exclude-backups --exclude-caches -zcf "$filedump" . || exit $?
